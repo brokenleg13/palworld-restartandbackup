@@ -23,6 +23,4 @@ BACKUP_INTERVAL = 15*60  # 备份间隔时长(seconds)
 
 # [运行]
 
-脚本放到`steamcmd\steamapps\common\PalServer`目录下
-
-执行`python restartandbackup.py`直接运行即可
+命令行执行`python restartandbackup.py`直接运行即可
