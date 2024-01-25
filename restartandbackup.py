@@ -8,14 +8,14 @@ import schedule
 
 # [重启功能设置]
 PROCESS_NAME = "PalServer-Win64-Test-Cmd.exe"  # server进程
-MEN_THRESHOLD = 13*1024  # 重启内存阈值(MB)
+MEM_THRESHOLD = 13*1024  # 重启内存阈值(MB)
 RESTART_TIME = ["04:00", "11:00", "18:00"]  # 定时重启
 SERVER_PATH = r"C:\Users\Administrator\Desktop\Server\palworld\steamcmd\steamapps\common\PalServer\PalServer.exe"  # server路径
 
 # [备份功能设置]
 BACKUP_SOURSE_FOLDER = r'C:\Users\Administrator\Desktop\Server\palworld\steamcmd\steamapps\common\PalServer\Pal\Saved\SaveGames\0'  # 存档源文件夹路径
 BACKUP_BASE_FOLDER = r'C:\Backups'  # 备份文件夹的基础路径
-BACKUP_INTERVAL = 15*60  # 备份间隔时长(seconds)
+BACKUP_INTERVAL = 15 * 60  # 备份间隔时长(seconds)
 
 
 # 通过进程名查找进程
@@ -60,6 +60,8 @@ def monitor_process_memory(process_name):
 
 def terminate_process_by_name(process_name):
     # todo 添加机器人
+    backup_archive()  # 强退前备份一次
+    time.sleep(2)
     for proc in psutil.process_iter():
         if proc.name() == process_name:
             proc.terminate()
@@ -85,9 +87,9 @@ def backup_archive():
 
 def restart_server():
     print("任务执行中...重启服务器")
-    subprocess.Popen([SERVER_PATH, f'--port=8211'])
-    time.sleep(2)
     terminate_process_by_name(PROCESS_NAME)
+    time.sleep(2)
+    subprocess.Popen([SERVER_PATH, f'--port=8211'])
 
 
 def bind_schedule():
@@ -104,11 +106,11 @@ def main():
         mem_msg = monitor_process_memory(PROCESS_NAME)
         if mem_msg:
             # 内存超过阈值终止进程
-            if mem_msg["memory_usage"] > MEN_THRESHOLD:
+            if mem_msg["memory_usage"] > MEM_THRESHOLD:
                 print(f"当前内存占用{mem_msg['memory_usage']}已超过阈值，重启服务器")
-                terminate_process_by_name(PROCESS_NAME)
+                restart_server()
             else:
-                time.sleep(10)
+                time.sleep(5)
         else:
             print("-------------启动服务器-----------------")
             subprocess.Popen([SERVER_PATH, f'--port=8211'])
